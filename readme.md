@@ -8,11 +8,7 @@ A PyTorch implementation of "DropMax"
 [paper](https://arxiv.org/pdf/1712.07834.pdf)
 [Original TF Repo](https://github.com/haebeom-lee/dropmax)
 
-<hr>
-
 Python 3.6, Pytorch 1.0.0
-
-<hr>
 
 Compare with `CrossEntropy Loss` on MNIST Dataset
 
