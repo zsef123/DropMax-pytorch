@@ -1,4 +1,5 @@
 import torch
+import torch.nn.functional as F
 from torch import distributions
 
 
@@ -56,4 +57,3 @@ class DropMax:
         aux = self._aux(r, y)
         ent = self._entropy(p)
         return cent + kl + aux + ent
-

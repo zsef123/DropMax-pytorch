@@ -8,6 +8,7 @@ from network import CNN, DropMaxCNN
 from DropMax import DropMax
 
 if __name__ == "__main__":
+    n_classes = 10
     device = torch.device("cuda")
 
     transform=transforms.Compose([
@@ -27,20 +28,20 @@ if __name__ == "__main__":
     print("Train : ", len(trains.dataset))
     print("Test : ", len(tests.dataset))
 
-    dropmax_cnn = DropMaxCNN().to(device)
+    dropmax_cnn = DropMaxCNN(n_classes=n_classes).to(device)
     dropmax_loss = DropMax(device)
-    adam = optim.Adam(dropmax_cnn.parameters(), lr=0.0005, betas=(0.5, 0.999))
+    adam = optim.Adam(dropmax_cnn.parameters(), lr=0.0005, betas=(0.5, 0.999), weight_decay=1e-4)
 
-    cnn = CNN().to(device)
-    crossEntropy = nn.CrossEntropyLoss()
-    adam2 = optim.Adam(cnn.parameters(), lr=0.0005, betas=(0.5, 0.999))
+    cnn = CNN(n_classes=n_classes).to(device)
+    ce_loss = nn.CrossEntropyLoss()
+    adam2 = optim.Adam(cnn.parameters(), lr=0.0005, betas=(0.5, 0.999), weight_decay=1e-4)
 
     for epoch in range(30):
         dropmax_cnn.train()
         print("Epoch : ", epoch)
         for i, (img, target) in enumerate(trains):
             img = img.to(device)
-            one_hot = torch.zeros(img.shape[0], 10)
+            one_hot = torch.zeros(img.shape[0], n_classes)
             one_hot.scatter_(1, target.unsqueeze(dim=1), 1)
             one_hot = one_hot.to(device)
 
@@ -52,7 +53,7 @@ if __name__ == "__main__":
             adam.step()
 
             o2 = cnn(img)
-            loss2 = crossEntropy(o2, target.to(device))
+            loss2 = ce_loss(o2, target.to(device))
 
             adam2.zero_grad()
             loss2.backward()
@@ -64,11 +65,10 @@ if __name__ == "__main__":
                 break
 
 
-        correct = 0
-        c2 = 0
+        correct, correct2 = 0, 0
         for i, (img, target) in enumerate(tests):
             img = img.to(device)
-            one_hot = torch.zeros(img.shape[0], 10)
+            one_hot = torch.zeros(img.shape[0], n_classes)
             one_hot.scatter_(1, target.unsqueeze(dim=1), 1)
             one_hot = one_hot.to(device)
             o, p, r, q = dropmax_cnn(img)
@@ -77,9 +77,9 @@ if __name__ == "__main__":
 
             o2 = cnn(img)
             _, idx = o2.max(dim=1)
-            c2 += (idx.cpu() == target).sum().item()
+            correct2 += (idx.cpu() == target).sum().item()
 
-        print("DM acc : ", correct / len(tests.dataset))
-        print("CE acc : ", c2 / len(tests.dataset))
+        print("DM acc : ", correct  / len(tests.dataset))
+        print("CE acc : ", correct2 / len(tests.dataset))
         print("--------")
 
