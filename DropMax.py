@@ -44,8 +44,8 @@ class DropMax:
         ent = p * self._log(p) + (1 - p) * self._log(1 - p)
         return ent.mean(dim=0).sum()
 
-    def get_acc(self, z, o, label):
-        pred = (z + self.eps) * torch.exp(o)
+    def get_acc(self, p, o, label):
+        pred = (p + self.eps) * torch.exp(o)
         _, idx = pred.max(1)
         return (idx.cpu() == label).sum().item()
 

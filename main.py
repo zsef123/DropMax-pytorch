@@ -72,8 +72,7 @@ if __name__ == "__main__":
             one_hot.scatter_(1, target.unsqueeze(dim=1), 1)
             one_hot = one_hot.to(device)
             o, p, r, q = dropmax_cnn(img)
-            z = dropmax_loss._binary_mask(p, one_hot)
-            correct += dropmax_loss.get_acc(z, o, target)
+            correct += dropmax_loss.get_acc(p, o, target)
 
             o2 = cnn(img)
             _, idx = o2.max(dim=1)
